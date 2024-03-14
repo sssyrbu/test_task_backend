@@ -3,7 +3,7 @@ from fastapi import APIRouter, status, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from models.schemas import UserCreate, User, Token, UserInDB
 from models.database import UserRepository
-from typing import Optional
+from typing import Optional, Annotated
 from utilities.deps import get_current_user
 from utilities.password_service import PasswordService
 from utilities.utilities import create_access_token, create_refresh_token 
@@ -16,10 +16,10 @@ user_router = APIRouter(
 )
 
 password_service = PasswordService()
+user_repo = UserRepository(password_service)
 
 @user_router.post("/signup", summary="Зарегестрироваться", response_model=User)
 async def register_user(user_create: UserCreate) -> Optional[User]:
-    user_repo = UserRepository(password_service)
     existing_user = await user_repo.get_user_by_email(user_create.email)
     if existing_user:
         raise HTTPException(
@@ -28,14 +28,11 @@ async def register_user(user_create: UserCreate) -> Optional[User]:
         )
 
     new_user = await user_repo.create_user(user_create)
-    message = f"Регистрация прошла успешно. Ваши данные: email='{new_user.email}'"
-    return User(email=new_user.email, message=message)
-    # return User(email=new_user.email)
+    return new_user
 
 
 @user_router.post('/login', summary="Войти в систему", response_model=Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user_repo = UserRepository(password_service)
+async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     existing_user = await user_repo.get_user_by_email(form_data.username)
     if existing_user is None:
         raise HTTPException(
@@ -57,6 +54,6 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     }
     
 
-@user_router.get('/me', summary='Get details of currently logged in user', response_model=User)
-async def get_me(user: User = Depends(get_current_user)):
-    return User(email=user.email, message="Информация о вас")
+# @user_router.get('/me', summary='Get details of currently logged in user', response_model=User)
+# async def get_me(user: User = Depends(get_current_user)):
+#     return User(email=user.email, message="Информация о вас")

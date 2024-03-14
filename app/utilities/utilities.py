@@ -5,10 +5,11 @@ from dotenv import load_dotenv
 import os
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from models.database import UserRepository
 from models.schemas import User, UserInDB
-from utilities.password_service import PasswordService
+import secrets
+import string
 from typing import Union, Any
+from utilities.password_service import PasswordService
 
 
 load_dotenv()
@@ -18,8 +19,6 @@ ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 DATABASE_PATH = os.getenv("DATABASE_PATH")
 REFRESH_TOKEN_EXPIRE_MINUTES = int(os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES"))
-
-password_service = PasswordService()
 
 
 async def initialize_db():
@@ -36,14 +35,15 @@ async def initialize_db():
         await db.commit()
 
 
-def authenticate_user(fake_db, email: str, password: str):
-    user = UserRepository(password_service)
-    existing_user = user.get_user_by_email(email)
-    if existing_user is None:
-        return False
-    if not password_service.verify_password(password, user.hashed_password):
-        return False
-    return existing_user
+# def authenticate_user(email: str, password: str):
+#     user = UserRepository(password_service)
+#     existing_user = user.get_user_by_email(email)
+#     if existing_user is None:
+#         return False
+#     if not password_service.verify_password(password, user.hashed_password):
+#         return False
+
+#     return existing_user
 
 
 def create_access_token(subject: Union[str, Any], expires_delta: int = None) -> str:
@@ -54,6 +54,7 @@ def create_access_token(subject: Union[str, Any], expires_delta: int = None) -> 
     
     to_encode = {"exp": expires_delta, "sub": str(subject)}
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, ALGORITHM)
+
     return encoded_jwt
 
 
@@ -65,12 +66,14 @@ def create_refresh_token(subject: Union[str, Any], expires_delta: int = None) ->
     
     to_encode = {"exp": expires_delta, "sub": str(subject)}
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, ALGORITHM)
+
     return encoded_jwt
 
 
 def create_ref_code():
-    pass
-
-
-async def add_code_to_db(user_email: str):
-    pass
+    # create a code of 10 characters without ' or "
+    characters = string.ascii_uppercase + string.digits
+    characters = characters.replace("'", "").replace('"', "")
+    code = ''.join(secrets.choice(characters) for _ in range(length))
+    
+    return code
