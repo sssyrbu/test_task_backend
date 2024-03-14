@@ -26,8 +26,10 @@ async def initialize_db():
     async with aiosqlite.connect(DATABASE_PATH) as db:
         query = """
         CREATE TABLE IF NOT EXISTS users(
+            id INT,
             email VARCHAR(100),
-            hashed_password VARCHAR(64)
+            hashed_password VARCHAR(64),
+            ref_code VARCHAR(10)
         );
         """
         await db.executescript(query)
@@ -64,3 +66,11 @@ def create_refresh_token(subject: Union[str, Any], expires_delta: int = None) ->
     to_encode = {"exp": expires_delta, "sub": str(subject)}
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, ALGORITHM)
     return encoded_jwt
+
+
+def create_ref_code():
+    pass
+
+
+async def add_code_to_db(user_email: str):
+    pass

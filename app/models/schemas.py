@@ -11,8 +11,8 @@ class TokenPayload(BaseModel):
     exp: int = None
 
 class User(BaseModel):
+    user_id: int
     email: str
-    message: Optional[str] = None 
     
     
 class UserCreate(BaseModel):
@@ -22,3 +22,4 @@ class UserCreate(BaseModel):
 
 class UserInDB(User):
     hashed_password: str
+    ref_code: Optional[str] = None
