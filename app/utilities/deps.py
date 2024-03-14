@@ -1,4 +1,5 @@
-from models.schemas import Token, User
+from models.database import UserRepository
+from models.schemas import Token, TokenPayload, User, UserInDB
 from dotenv import load_dotenv
 from datetime import datetime
 from fastapi import Depends, HTTPException, status
@@ -7,7 +8,7 @@ import os
 from typing import Union, Any
 from jose import jwt
 from pydantic import ValidationError
-from replit import db
+from utilities.password_service import PasswordService
 
 load_dotenv()
 
@@ -22,13 +23,15 @@ reuseable_oauth = OAuth2PasswordBearer(
     scheme_name="JWT"
 )
 
+passw_service = PasswordService()
+user_repo = UserRepository(passw_service)
 
 async def get_current_user(token: str = Depends(reuseable_oauth)) -> User:
     try:
         payload = jwt.decode(
             token, SECRET_KEY, algorithms=[ALGORITHM]
         )
-        token_data = Token(**payload)
+        token_data = TokenPayload(**payload)
         
         if datetime.fromtimestamp(token_data.exp) < datetime.now():
             raise HTTPException(
@@ -42,14 +45,11 @@ async def get_current_user(token: str = Depends(reuseable_oauth)) -> User:
             detail="У вас нет доступа к данному ресурсу.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-        
-    user: Union[dict[str, Any], None] = db.get(token_data.sub, None)
-    
-    
+    user = await user_repo.get_user_by_email(token_data.sub) 
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Данный пользователь не найден",
         )
     
-    return SystemUser(**user)
+    return User(email=user.email)

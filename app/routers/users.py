@@ -1,9 +1,10 @@
 # Router for everything related to user accounts 
 from fastapi import APIRouter, status, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from models.schemas import UserCreate, User, Token
+from models.schemas import UserCreate, User, Token, UserInDB
 from models.database import UserRepository
 from typing import Optional
+from utilities.deps import get_current_user
 from utilities.password_service import PasswordService
 from utilities.utilities import create_access_token, create_refresh_token 
 
@@ -54,3 +55,8 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         "token_type": "bearer",
         "refresh_token": create_refresh_token(existing_user.email),
     }
+    
+
+@user_router.get('/me', summary='Get details of currently logged in user', response_model=User)
+async def get_me(user: User = Depends(get_current_user)):
+    return User(email=user.email, message="Информация о вас")
