@@ -16,7 +16,7 @@ user_router = APIRouter(
 
 password_service = PasswordService()
 
-@user_router.post("/signup", response_model=User)
+@user_router.post("/signup", summary="Зарегестрироваться", response_model=User)
 async def register_user(user_create: UserCreate) -> Optional[User]:
     user_repo = UserRepository(password_service)
     existing_user = await user_repo.get_user_by_email(user_create.email)
