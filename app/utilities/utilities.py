@@ -25,25 +25,18 @@ async def initialize_db():
     async with aiosqlite.connect(DATABASE_PATH) as db:
         query = """
         CREATE TABLE IF NOT EXISTS users(
-            id INT,
+            user_id INT,
             email VARCHAR(100),
             hashed_password VARCHAR(64),
-            ref_code VARCHAR(10)
+        );
+        CREATE TABLE IF NOT EXISTS codes(
+            ref_code VARCHAR(10),
+            user_id INT,
+            exp_date TEXT
         );
         """
         await db.executescript(query)
         await db.commit()
-
-
-# def authenticate_user(email: str, password: str):
-#     user = UserRepository(password_service)
-#     existing_user = user.get_user_by_email(email)
-#     if existing_user is None:
-#         return False
-#     if not password_service.verify_password(password, user.hashed_password):
-#         return False
-
-#     return existing_user
 
 
 def create_access_token(subject: Union[str, Any], expires_delta: int = None) -> str:
@@ -72,6 +65,7 @@ def create_refresh_token(subject: Union[str, Any], expires_delta: int = None) ->
 
 def create_ref_code():
     # create a code of 10 characters without ' or "
+    length = 10
     characters = string.ascii_uppercase + string.digits
     characters = characters.replace("'", "").replace('"', "")
     code = ''.join(secrets.choice(characters) for _ in range(length))

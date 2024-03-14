@@ -6,7 +6,7 @@ import uvicorn
 app = FastAPI()
 
 app.include_router(users.user_router)
-
+app.include_router(codes.codes_router)
 
 @app.on_event("startup")
 async def startup_event():

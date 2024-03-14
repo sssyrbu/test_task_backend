@@ -24,4 +24,16 @@ class UserCreate(BaseModel):
 
 class UserInDB(User):
     hashed_password: str
-    ref_code: Optional[str] = None
+
+
+class Code(BaseModel):
+    ref_code: str
+
+
+class CodeInDB(Code):
+    user_id: int
+    exp_date: str 
+
+
+class RefCodeCreate(BaseModel):
+    expiration_in_minutes: int

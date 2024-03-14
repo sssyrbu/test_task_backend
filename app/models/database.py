@@ -1,12 +1,12 @@
 import aiosqlite
 import asyncio
+from datetime import datetime
 from dotenv import load_dotenv
-from models.schemas import UserInDB, UserCreate, User
+from models.schemas import UserInDB, UserCreate, User, CodeInDB, Code
 import os
 import random
 from typing import Optional
 from utilities.password_service import PasswordService
-from utilities.utilities import create_ref_code
 
 load_dotenv()
 
@@ -37,18 +37,22 @@ class UserRepository:
             await db.commit()
             new_user = await self.get_user_by_email(user_create.email)
             return new_user
+    
         
+    async def get_user_code() -> Code:
+        pass
+    
 
-    async def add_code_to_db(user_email: str) -> bool:
+    async def add_code_to_db(user: User, code: Code) -> bool | Code:
         user = await self.get_user_by_email(user_email)
         if user.ref_code is not None:
             return False
         
-        ref_code = create_ref_code()
         async with aiosqlite.connect(DATABASE_PATH) as db:
             await db.execute(
-                "UPDATE users SET ref_code = ? WHERE email = ?",
-                (ref_code, user_email)
+                "INSERT INTO codes (ref_code, user_id, exp_date) VALUES (?, ?, ?)",
+                (code.ref_code, user.user_id, code.exp_date)
             )
             await db.commit()
-        return True
+        added_code = await self.get_user_code()
+        return added_code

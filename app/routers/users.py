@@ -53,7 +53,3 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
         "refresh_token": create_refresh_token(existing_user.email),
     }
     
-
-# @user_router.get('/me', summary='Get details of currently logged in user', response_model=User)
-# async def get_me(user: User = Depends(get_current_user)):
-#     return User(email=user.email, message="Информация о вас")
