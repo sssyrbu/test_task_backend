@@ -85,7 +85,8 @@ class UserRepository:
             async with db.execute("SELECT * FROM codes WHERE user_id = ?", (referrer_id,)) as cursor:
                 row = await cursor.fetchone()
                 if row:
-                    return CodeInDB(ref_code=row[0], exp_date=row[1], user_id=row[2]) 
+                    print(row)
+                    return CodeInDB(ref_code=row[0], user_id=row[1], exp_date=row[2]) 
 
         return None
          

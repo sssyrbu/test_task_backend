@@ -26,13 +26,19 @@ passw_service = PasswordService()
 user_repo = UserRepository(passw_service)
 
 async def get_current_user(token: str = Depends(reuseable_oauth)) -> User:
+    # print(token)
+    # a = jwt.decode(
+    #         token, SECRET_KEY, algorithms=[ALGORITHM]
+    #     )
+    # print(a)
+    # print(TokenPayload(exp=str(a["exp"]), sub=a["sub"]))
     try:
         payload = jwt.decode(
             token, SECRET_KEY, algorithms=[ALGORITHM]
         )
-        token_data = TokenPayload(**payload)
+        token_data = TokenPayload(exp=str(payload["exp"]), sub=payload["sub"])
         
-        if datetime.fromtimestamp(token_data.exp) < datetime.now():
+        if datetime.fromtimestamp(int(token_data.exp)) < datetime.now():
             raise HTTPException(
                 status_code = status.HTTP_401_UNAUTHORIZED,
                 detail="Срок действия токена истек.",
