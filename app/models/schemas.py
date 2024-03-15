@@ -28,11 +28,16 @@ class UserInDB(User):
 
 class Code(BaseModel):
     ref_code: str
+    exp_date: str 
+    
+
+class CodeOutput(BaseModel):
+    ref_code: str
+    exp_date: str 
 
 
 class CodeInDB(Code):
     user_id: int
-    exp_date: str 
 
 
 class RefCodeCreate(BaseModel):

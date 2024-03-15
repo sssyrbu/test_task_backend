@@ -27,7 +27,7 @@ async def initialize_db():
         CREATE TABLE IF NOT EXISTS users(
             user_id INT,
             email VARCHAR(100),
-            hashed_password VARCHAR(64),
+            hashed_password VARCHAR(64)
         );
         CREATE TABLE IF NOT EXISTS codes(
             ref_code VARCHAR(10),

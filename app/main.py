@@ -11,7 +11,6 @@ app.include_router(codes.codes_router)
 @app.on_event("startup")
 async def startup_event():
     await initialize_db()
-    print("db was initialized")
     
     
 @app.get("/")

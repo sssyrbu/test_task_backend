@@ -31,7 +31,7 @@ class UserRepository:
             user_id = random.randint(10000, 99999)
             hashed_pass = self.password_service.get_password_hash(user_create.password)
             await db.execute(
-                "INSERT INTO users (id, email, hashed_password) VALUES (?, ?, ?)",
+                "INSERT INTO users (user_id, email, hashed_password) VALUES (?, ?, ?)",
                 (user_id, user_create.email, hashed_pass)
             )
             await db.commit()
@@ -39,20 +39,21 @@ class UserRepository:
             return new_user
     
         
-    async def get_user_code() -> Code:
-        pass
+    async def get_user_code(self, user: User) -> Code:
+        async with aiosqlite.connect(DATABASE_PATH) as db:
+            async with db.execute("SELECT * FROM codes WHERE user_id = ?", (user.user_id,)) as cursor:
+                row = await cursor.fetchone()
+                if row:
+                    return Code(ref_code=row[0], exp_date=row[2])
+        return None
     
 
-    async def add_code_to_db(user: User, code: Code) -> bool | Code:
-        user = await self.get_user_by_email(user_email)
-        if user.ref_code is not None:
-            return False
-        
+    async def add_code_to_db(self, user: User, code: CodeInDB) -> bool | Code:
         async with aiosqlite.connect(DATABASE_PATH) as db:
             await db.execute(
-                "INSERT INTO codes (ref_code, user_id, exp_date) VALUES (?, ?, ?)",
-                (code.ref_code, user.user_id, code.exp_date)
+                "INSERT INTO codes (ref_code, exp_date, user_id) VALUES (?, ?, ?)",
+                (code.ref_code, code.exp_date, user.user_id)
             )
             await db.commit()
-        added_code = await self.get_user_code()
+        added_code = await self.get_user_code(user)
         return added_code

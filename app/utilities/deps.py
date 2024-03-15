@@ -51,5 +51,5 @@ async def get_current_user(token: str = Depends(reuseable_oauth)) -> User:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Данный пользователь не найден",
         )
-    
-    return User(email=user.email)
+    print(user)
+    return User(user_id=user.user_id, email=user.email)

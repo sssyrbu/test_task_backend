@@ -31,7 +31,7 @@ async def register_user(user_create: UserCreate) -> Optional[User]:
     return new_user
 
 
-@user_router.post('/login', summary="Войти в систему", response_model=Token)
+@user_router.post('/login', summary="Войти в систему", response_model=dict)
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     existing_user = await user_repo.get_user_by_email(form_data.username)
     if existing_user is None:
