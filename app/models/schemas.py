@@ -1,5 +1,4 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
 
 
 class Token(BaseModel):
@@ -31,14 +30,10 @@ class Code(BaseModel):
     exp_date: str 
     
 
-class CodeOutput(BaseModel):
-    ref_code: str
-    exp_date: str 
-
-
 class CodeInDB(Code):
     user_id: int
 
 
 class RefCodeCreate(BaseModel):
     expiration_in_minutes: int
+    

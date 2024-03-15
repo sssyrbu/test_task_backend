@@ -1,7 +1,7 @@
 # Router for everything related to user accounts 
 from fastapi import APIRouter, status, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from models.schemas import UserCreate, User, Token, UserInDB
+from models.schemas import UserCreate, User, UserInDB
 from models.database import UserRepository
 from typing import Optional, Annotated
 from utilities.deps import get_current_user
@@ -18,7 +18,7 @@ user_router = APIRouter(
 password_service = PasswordService()
 user_repo = UserRepository(password_service)
 
-@user_router.post("/signup", summary="Зарегестрироваться", response_model=User)
+@user_router.post("/signup", summary="Зарегестрироваться", response_model=dict)
 async def register_user(user_create: UserCreate) -> Optional[User]:
     existing_user = await user_repo.get_user_by_email(user_create.email)
     if existing_user:
@@ -28,7 +28,11 @@ async def register_user(user_create: UserCreate) -> Optional[User]:
         )
 
     new_user = await user_repo.create_user(user_create)
-    return new_user
+
+    return {
+        "message": "Вы успешно зарегестрировались.",
+        "user_data": new_user
+    }
 
 
 @user_router.post('/login', summary="Войти в систему", response_model=dict)

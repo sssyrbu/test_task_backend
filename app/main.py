@@ -15,7 +15,7 @@ async def startup_event():
     
 @app.get("/")
 async def root():
-    return {"message": "Main page"}
+    return {"message": "Главная страница. Перейдите в /docs для UI документации"}
 
 
 if __name__ == "__main__":

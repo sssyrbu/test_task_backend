@@ -1,11 +1,10 @@
 from models.database import UserRepository
-from models.schemas import Token, TokenPayload, User, UserInDB
+from models.schemas import TokenPayload, User, UserInDB
 from dotenv import load_dotenv
 from datetime import datetime
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 import os
-from typing import Union, Any
 from jose import jwt
 from pydantic import ValidationError
 from utilities.password_service import PasswordService
@@ -51,5 +50,5 @@ async def get_current_user(token: str = Depends(reuseable_oauth)) -> User:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Данный пользователь не найден",
         )
-    print(user)
+
     return User(user_id=user.user_id, email=user.email)

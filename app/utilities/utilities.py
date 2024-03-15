@@ -1,11 +1,8 @@
 import aiosqlite
-import asyncio
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 import os
-from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from models.schemas import User, UserInDB
 import secrets
 import string
 from typing import Union, Any
