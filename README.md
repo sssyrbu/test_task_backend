@@ -26,18 +26,22 @@
 1. ```
    git clone https://github.com/sssyrbu/test_task_backend
    ```
-2. ```
+2. Этой юникс командой создадим приватный ключ для создания и валидации jwt
+   ```
+   echo "SECRET_KEY = '$(openssl rand -hex 32)'" >> .env
+   ```  
+4. ```
    python3 -m venv venv
    ```
-3. ```
+5. ```
    source venv/bin/activate
    ```
-4. ```
+6. ```
    pip install -r requirements.txt
    ```
-5. ```
+7. ```
    cd app/
    ```
-6. ```
+8. ```
    python3 main.py
    ```
