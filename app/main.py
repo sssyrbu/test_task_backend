@@ -1,17 +1,19 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from routers import codes, users
 from utilities.utilities import initialize_db
 import uvicorn
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await initialize_db()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(users.user_router)
 app.include_router(codes.codes_router)
 
-@app.on_event("startup")
-async def startup_event():
-    await initialize_db()
-    
     
 @app.get("/")
 async def root():

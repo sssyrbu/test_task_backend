@@ -22,7 +22,7 @@ user_repo = UserRepository(password_service)
 @user_router.post("/signup", summary="Зарегестрироваться", response_model=dict)
 async def register_user(user_create: UserCreate) -> Optional[User]:
     existing_user = await user_repo.get_user_by_email(user_create.email)
-    if existing_user:
+    if existing_user is not None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Пользователь с данной почтой уже существует."
