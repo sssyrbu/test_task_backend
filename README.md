@@ -22,26 +22,46 @@
 
 ### Установка
 Есть два варианта установки: локально и через докер.
-
+#### Локально
 1. ```
    git clone https://github.com/sssyrbu/test_task_backend
    ```
-2. Этой юникс командой создадим приватный ключ для создания и валидации jwt
+2. ```
+   cd test_task_backend/
+   ```
+3. Этой юникс командой создадим приватный ключ для создания и валидации jwt
    ```
    echo "SECRET_KEY = '$(openssl rand -hex 32)'" >> .env
    ```  
-4. ```
+5. ```
    python3 -m venv venv
    ```
-5. ```
+6. ```
    source venv/bin/activate
    ```
-6. ```
+7. ```
    pip install -r requirements.txt
    ```
-7. ```
+8. ```
    cd app/
    ```
-8. ```
+9. ```
    python3 main.py
    ```
+
+#### Докер
+1. ```
+   git clone https://github.com/sssyrbu/test_task_backend
+   ```
+2. ```
+   cd test_task_backend/
+   ```
+3. ```
+   docker build -t referral_app .
+   ```   
+4. ```
+   docker run -p -d 8081:8081 --name ref_app_container referral_app
+   ```
+
+### Адрес
+http://0.0.0.0:8081/
