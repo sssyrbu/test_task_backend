@@ -1,4 +1,5 @@
 import aiosqlite
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 from models.schemas import UserInDB, UserCreate, User, CodeInDB, Code
 import os
@@ -94,7 +95,7 @@ class UserRepository:
         return user_code
 
 
-    async def get_referrals_by_referrer_id(self, referrer_id: int):
+    async def get_referrals_by_referrer_id(self, referrer_id: int) -> list[int, str]:
         async with aiosqlite.connect(DATABASE_PATH) as db:
             async with db.execute("SELECT user_id, email FROM users WHERE referrer_id = ?", (referrer_id,)) as cursor:
                 refs = await cursor.fetchall()
@@ -104,7 +105,7 @@ class UserRepository:
         return None
     
     
-    async def get_user_id_by_email(self, email: str):
+    async def get_user_id_by_email(self, email: str) -> int:
         async with aiosqlite.connect(DATABASE_PATH) as db:
             async with db.execute("SELECT user_id FROM users WHERE email = ?", (email,)) as cursor:
                 row = await cursor.fetchone()
@@ -112,3 +113,16 @@ class UserRepository:
                     return row[0] 
 
         return None
+
+
+    async def valid_ref_code(self, ref_code: str) -> bool:
+        async with aiosqlite.connect(DATABASE_PATH) as db:
+            async with db.execute("SELECT exp_date FROM codes WHERE ref_code = ?", (ref_code,)) as cursor:
+                row = await cursor.fetchone()
+                if row is not None:
+                    exp_date = datetime.fromisoformat(row[0].replace('Z', '+00:00')).replace(tzinfo=timezone.utc)
+                    if exp_date > datetime.now(timezone.utc):
+                        return True
+        return False
+
+        

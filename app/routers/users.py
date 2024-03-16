@@ -28,10 +28,12 @@ async def register_user(user_create: UserCreate) -> Optional[User]:
             detail="Пользователь с данной почтой уже существует."
         )
     new_user = await user_repo.create_user(user_create)
-    if user_create.signup_ref_code is not None:
-        pass
-        # code_data = await user_repo.get_code_data_by_ref_code(user_create.ref_code)
-        # await user_repo.increment_referrals_count()
+    if (user_create.signup_ref_code is not None) and (user_create.signup_ref_code != "string"):
+        if not await user_repo.valid_ref_code(user_create.signup_ref_code):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Реферальный код не найден или устарел."
+            )
 
     return {
         "message": "Вы успешно зарегестрировались.",
