@@ -66,7 +66,7 @@
 ### Адрес
 http://0.0.0.0:8081/
 ### UI docs
-http://0.0.0.0:8081/
+http://0.0.0.0:8081/docs
 
 
 ![image](https://github.com/sssyrbu/test_task_backend/assets/68150627/77dcb94a-fcf3-4d27-bd75-42248e3d566d)
