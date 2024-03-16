@@ -3,6 +3,7 @@ from fastapi import APIRouter, status, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from models.schemas import UserCreate, User, UserInDB
 from models.database import UserRepository
+from pydantic import EmailStr
 from typing import Optional, Annotated
 from utilities.deps import get_current_user
 from utilities.password_service import PasswordService
@@ -59,8 +60,21 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
         "token_type": "bearer",
         "refresh_token": create_refresh_token(existing_user.email),
     }
-    
-@user_router.get('/get_referrals_from_referrer_id', summary='Получить информацию о рефералах по айди реферера', response_model=dict)
+
+
+@user_router.get('/get_user_id_from_email', summary='Получить id пользователя через email', response_model=dict)
+async def get_user_id_from_email(email: EmailStr, current_user: Annotated[User, Depends(get_current_user)]):
+    user_id = await user_repo.get_user_id_by_email(email)
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Такого пользователя не существует."
+        )
+        
+    return {"user_id": user_id}
+
+
+@user_router.get('/get_referrals_from_referrer_id', summary='Получить информацию о рефералах по id реферера', response_model=dict)
 async def get_referrals_from_referrer_id(referrer_id: int, current_user: Annotated[User, Depends(get_current_user)]):
     referrals_data = await user_repo.get_referrals_by_referrer_id(referrer_id)
 

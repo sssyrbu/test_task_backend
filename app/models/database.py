@@ -103,10 +103,12 @@ class UserRepository:
 
         return None
     
+    
+    async def get_user_id_by_email(self, email: str):
+        async with aiosqlite.connect(DATABASE_PATH) as db:
+            async with db.execute("SELECT user_id FROM users WHERE email = ?", (email,)) as cursor:
+                row = await cursor.fetchone()
+                if row is not None:
+                    return row[0] 
 
-    # async def get_referrals(self, referrer_id):
-    #     ref_code = await self.get_code_data_by_referrer_id(referrer_id)
-    #     if ref_code is not None:
-    #         return await self.get_referrals_by_ref_code(ref_code.ref_code)
-
-    #     return None
+        return None
