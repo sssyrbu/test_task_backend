@@ -25,7 +25,8 @@ async def initialize_db():
             user_id INT,
             email VARCHAR(100),
             hashed_password VARCHAR(64),
-            signup_ref_code VARCHAR(10)
+            signup_ref_code VARCHAR(10),
+            referrer_id INT
         );
         CREATE TABLE IF NOT EXISTS codes(
             ref_code VARCHAR(10),

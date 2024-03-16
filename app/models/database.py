@@ -25,7 +25,17 @@ class UserRepository:
         return None
     
 
-    async def create_user(self, user_create: UserCreate) -> Optional[User]:
+    async def get_referrer_id_from_code(self, code: str) -> Optional[int]:
+        async with aiosqlite.connect(DATABASE_PATH) as db:
+            async with db.execute("SELECT user_id FROM codes WHERE ref_code = ?", (code,)) as cursor:
+                user_id = await cursor.fetchone()
+                if user_id:
+                    return user_id[0] 
+
+        return None
+    
+
+    async def create_user(self, user_create: UserCreate) -> Optional[UserInDB]:
         async with aiosqlite.connect(DATABASE_PATH) as db:
             user_id = random.randint(10000, 99999)
             async with db.execute("SELECT * FROM users WHERE user_id = ?", (user_id,)) as cursor:
@@ -36,10 +46,14 @@ class UserRepository:
                     user_id = random.randint(10000, 99999)
             if user_create.signup_ref_code == "string":
                 user_create.signup_ref_code = None
+            if user_create.signup_ref_code is not None:
+                referrer_id = await self.get_referrer_id_from_code(user_create.signup_ref_code)
+            else:
+                referrer_id = None
             hashed_pass = self.password_service.get_password_hash(user_create.password)
             await db.execute(
-                "INSERT INTO users (user_id, email, hashed_password, signup_ref_code) VALUES (?, ?, ?, ?)",
-                (user_id, user_create.email, hashed_pass, user_create.signup_ref_code)
+                "INSERT INTO users (user_id, email, hashed_password, signup_ref_code, referrer_id) VALUES (?, ?, ?, ?, ?)",
+                (user_id, user_create.email, hashed_pass, user_create.signup_ref_code, referrer_id)
             )
             await db.commit()
             new_user = await self.get_user_by_email(user_create.email)
@@ -80,20 +94,9 @@ class UserRepository:
         return user_code
 
 
-    async def get_code_data_by_referrer_id(self, referrer_id: int):
+    async def get_referrals_by_referrer_id(self, referrer_id: int):
         async with aiosqlite.connect(DATABASE_PATH) as db:
-            async with db.execute("SELECT * FROM codes WHERE user_id = ?", (referrer_id,)) as cursor:
-                row = await cursor.fetchone()
-                if row:
-                    print(row)
-                    return CodeInDB(ref_code=row[0], user_id=row[1], exp_date=row[2]) 
-
-        return None
-         
-
-    async def get_referrals_by_ref_code(self, ref_code: str):
-        async with aiosqlite.connect(DATABASE_PATH) as db:
-            async with db.execute("SELECT * FROM users WHERE signup_ref_code = ?", (ref_code,)) as cursor:
+            async with db.execute("SELECT user_id, email FROM users WHERE referrer_id = ?", (referrer_id,)) as cursor:
                 refs = await cursor.fetchall()
                 if refs:
                     return refs 
@@ -101,9 +104,9 @@ class UserRepository:
         return None
     
 
-    async def get_referrals(self, referrer_id):
-        ref_code = await self.get_code_data_by_referrer_id(referrer_id)
-        if ref_code is not None:
-            return await self.get_referrals_by_ref_code(ref_code.ref_code)
+    # async def get_referrals(self, referrer_id):
+    #     ref_code = await self.get_code_data_by_referrer_id(referrer_id)
+    #     if ref_code is not None:
+    #         return await self.get_referrals_by_ref_code(ref_code.ref_code)
 
-        return None
+    #     return None

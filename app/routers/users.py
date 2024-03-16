@@ -27,14 +27,14 @@ async def register_user(user_create: UserCreate) -> Optional[User]:
             detail="Пользователь с данной почтой уже существует."
         )
     new_user = await user_repo.create_user(user_create)
-    if user_create.ref_code is not None:
+    if user_create.signup_ref_code is not None:
         pass
         # code_data = await user_repo.get_code_data_by_ref_code(user_create.ref_code)
         # await user_repo.increment_referrals_count()
 
     return {
         "message": "Вы успешно зарегестрировались.",
-        "user_data": new_user
+        "user_data": User(user_id=new_user.user_id, email=new_user.email)
     }
 
 
@@ -62,6 +62,6 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     
 @user_router.get('/get_referrals_from_referrer_id', summary='Получить информацию о рефералах по айди реферера', response_model=dict)
 async def get_referrals_from_referrer_id(referrer_id: int, current_user: Annotated[User, Depends(get_current_user)]):
-    referrals_data = await user_repo.get_referrals(referrer_id)
+    referrals_data = await user_repo.get_referrals_by_referrer_id(referrer_id)
 
     return {"referrals": referrals_data}
