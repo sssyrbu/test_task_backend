@@ -60,7 +60,7 @@
    docker build -t referral_app .
    ```   
 4. ```
-   docker run -p -d 8081:8081 --name ref_app_container referral_app
+   docker run -p 8081:8081 --name ref_app_container referral_app
    ```
 
 ### Адрес
